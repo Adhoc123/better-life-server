@@ -55,7 +55,11 @@ async function run() {
         const reviews = await cursor.toArray();
         res.send(reviews);
       })
-
+      ////Edit api created
+      app.patch('/reviews/:id', async(req, res) =>{
+        const id = req.params.id;
+        const query = { _id: ObjectId(id) };
+      })
       ///Delete api creating
       app.delete('/reviews/:id', async(req, res) =>{
         const id = req.params.id;
