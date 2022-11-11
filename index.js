@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const app = express();
@@ -17,6 +18,14 @@ async function run() {
     try {
       const dataCollection = client.db("betterLife").collection("services");
       const reviewCollection = client.db("betterLife").collection("reviews");
+
+      ////posting jwt token
+      app.post('/jwt', async(req, res)=>{
+         const user = req.body;
+         const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn:'1h'})
+         res.send({token});
+      })
+      ///receiving services
       app.get('/services', async(req,res)=>{
         const query = {};
         const cursor = dataCollection.find(query);
@@ -42,10 +51,20 @@ async function run() {
          const result = await reviewCollection.insertOne(review);
          res.send(result);
       })
+      app.post('/addService', async(req, res) =>{
+        const service = req.body;
+        const result = await dataCollection.insertOne(service);
+        res.send(result);
+     })
 
       ///Reading reviews from database
       app.get('/reviews', async(req, res) =>{
         let query = {};
+        if(req.query.email){
+          query = {
+            email: req.query.email
+          }
+        }
         if(req.query.serviceId){
           query = {
             serviceId: req.query.serviceId
